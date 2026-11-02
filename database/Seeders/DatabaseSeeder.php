@@ -15,6 +15,13 @@ class DatabaseSeeder extends Seeder
     {
         Role::firstOrCreate(['name' => Role::ROOT_ADMIN]);
 
+        // Auto-seed Corex templates (FiveM txAdmin and Minecraft Multi-Engine)
+        try {
+            \Illuminate\Support\Facades\Artisan::call(\App\Console\Commands\Corex\ImportCorexEggsCommand::class);
+        } catch (\Throwable $e) {
+            // Ignore during early bootstrap
+        }
+
         $plugins = Plugin::query()->orderBy('load_order')->get();
         foreach ($plugins as $plugin) {
             if (!$plugin->shouldLoad()) {

@@ -1,0 +1,111 @@
+{
+    "_comment": "Corex Panel Preconfigured Template: FiveM FXServer with txAdmin",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-11-02T23:30:00+00:00",
+    "name": "Corex FiveM FXServer (txAdmin)",
+    "author": "support@corexpanel.com",
+    "uuid": "c07e1000-f10e-4000-8000-000000000001",
+    "description": "High-performance FiveM FXServer with integrated txAdmin web panel, auto-installer, and MariaDB automated provisioning.",
+    "tags": [
+        "fivem",
+        "txadmin",
+        "cfx",
+        "gta5",
+        "corex"
+    ],
+    "features": [
+        "eula",
+        "pid_limit",
+        "corex:auto_database"
+    ],
+    "docker_images": {
+        "ghcr.io/pelican-eggs/yolks:debian": "ghcr.io/pelican-eggs/yolks:debian",
+        "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+    },
+    "file_denylist": [],
+    "startup": "/bin/bash /opt/cfx-server/run.sh +set txAdminPort {{TXADMIN_PORT}} +set serverProfile default +set txAdminInterface 0.0.0.0 +set sv_maxclients {{MAX_PLAYERS}} +set steam_webApiKey \"{{STEAM_WEBAPIKEY}}\" +set sv_licenseKey \"{{FIVEM_LICENSE}}\"",
+    "config": {
+        "files": "{\r\n    \"server.cfg\": {\r\n        \"parser\": \"file\",\r\n        \"find\": {}\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"txAdmin has started\"\r\n}",
+        "logs": "{}",
+        "stop": "quit"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/bash\n# Corex FiveM Automated Installer with txAdmin\napt update\napt install -y curl tar xz-utils jq\n\ncd /mnt/server\nmkdir -p /mnt/server/alpine\n\necho \"Fetching FiveM FXServer build: ${FIVEM_ARTIFACT}...\"\nif [ \"${FIVEM_ARTIFACT}\" = \"latest\" ] || [ \"${FIVEM_ARTIFACT}\" = \"recommended\" ]; then\n    DOWNLOAD_URL=$(curl -s https://runtime.fivem.net/artifacts/fivem/build_provisional/ | grep -o 'https://runtime.fivem.net/artifacts/fivem/build_provisional/[0-9]*-.*fx.tar.xz' | head -n 1)\n    if [ -z \"${DOWNLOAD_URL}\" ]; then\n        DOWNLOAD_URL=\"https://runtime.fivem.net/artifacts/fivem/build_provisional/server.7290.fx.tar.xz\"\n    fi\nelse\n    DOWNLOAD_URL=\"https://runtime.fivem.net/artifacts/fivem/build_provisional/${FIVEM_ARTIFACT}.fx.tar.xz\"\nfi\n\necho \"Downloading from ${DOWNLOAD_URL}...\"\ncurl -sSL \"${DOWNLOAD_URL}\" -o fx.tar.xz\ntar -xvf fx.tar.xz -C /mnt/server/alpine\nrm -f fx.tar.xz\n\nln -sfn /mnt/server/alpine/run.sh /mnt/server/run.sh\nchmod +x /mnt/server/run.sh /mnt/server/alpine/run.sh /mnt/server/alpine/FXServer\n\necho \"Corex FiveM txAdmin installation complete!\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "FiveM Keymaster License",
+            "description": "Your Cfx.re Keymaster license key from https://keymaster.fivem.net",
+            "env_variable": "FIVEM_LICENSE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|min:10|max:64",
+            "sort": 1,
+            "field_type": "text"
+        },
+        {
+            "name": "txAdmin Web Port",
+            "description": "Port to access the txAdmin management dashboard in your browser.",
+            "env_variable": "TXADMIN_PORT",
+            "default_value": "40120",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1024,65535",
+            "sort": 2,
+            "field_type": "text"
+        },
+        {
+            "name": "Max Player Slots",
+            "description": "Maximum number of concurrent player connections allowed on this FXServer.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "48",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|min:1|max:2048",
+            "sort": 3,
+            "field_type": "text"
+        },
+        {
+            "name": "Steam Web API Key",
+            "description": "Steam Web API Key for Steam-authenticated FiveM framework joins.",
+            "env_variable": "STEAM_WEBAPIKEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "sort": 4,
+            "field_type": "text"
+        },
+        {
+            "name": "FiveM Artifact Version",
+            "description": "Specific FXServer artifact build number or 'latest'.",
+            "env_variable": "FIVEM_ARTIFACT",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "sort": 5,
+            "field_type": "text"
+        },
+        {
+            "name": "Auto Provision MariaDB",
+            "description": "Automatically provision a dedicated MariaDB database for this FiveM server.",
+            "env_variable": "AUTO_MARIADB",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|in:true,false",
+            "sort": 6,
+            "field_type": "text"
+        }
+    ]
+}

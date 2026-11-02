@@ -115,6 +115,21 @@ class ServerCreationService
 
             $this->storeEggVariables($server, $eggVariableData);
 
+            // Corex: Automated MariaDB database provisioning for FiveM and auto_database templates
+            $features = $egg->inherit_features ?? $egg->features ?? [];
+            if (in_array('corex:auto_database', $features) || str_contains(strtolower($egg->name), 'fivem')) {
+                try {
+                    $deployDbService = app(\App\Services\Databases\DeployServerDatabaseService::class);
+                    $deployDbService->handle($server, [
+                        'database' => 's' . $server->id . '_fivem',
+                        'remote' => '%',
+                    ]);
+                    \Illuminate\Support\Facades\Log::info("[Corex] Automated MariaDB database successfully provisioned for server {$server->uuid}");
+                } catch (\Throwable $dbException) {
+                    \Illuminate\Support\Facades\Log::warning("[Corex] Automated MariaDB database skipped: " . $dbException->getMessage());
+                }
+            }
+
             return $server;
         }, 5);
 
