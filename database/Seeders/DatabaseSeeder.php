@@ -18,6 +18,9 @@ class DatabaseSeeder extends Seeder
         // Auto-seed Corex templates (FiveM txAdmin and Minecraft Multi-Engine)
         try {
             \Illuminate\Support\Facades\Artisan::call(\App\Console\Commands\Corex\ImportCorexEggsCommand::class);
+            if (env('COREX_S3_BUCKET') && env('COREX_S3_KEY')) {
+                \Illuminate\Support\Facades\Artisan::call(\App\Console\Commands\Corex\ConfigureS3BackupCommand::class);
+            }
         } catch (\Throwable $e) {
             // Ignore during early bootstrap
         }
