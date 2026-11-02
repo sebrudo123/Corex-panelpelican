@@ -30,11 +30,11 @@ return [
             'button_label' => 'Crea el primer nodo',
         ],
         'intro-support' => [
-            'heading' => 'Apoyar a Pelican',
-            'content' => 'Gracias por usar Pelican. Esto solo ha sido posible gracias a vuestro apoyo, al de nuestros colaboradores y al de toda la comunidad.',
-            'extra_note' => 'Agradecemos todo el apoyo de cualquier persona.',
-            'button_translate' => 'Ayudar a traducir',
-            'button_donate' => 'Donar directamente',
+            'heading' => 'Infraestructura Corex',
+            'content' => 'Plataforma empresarial de alto rendimiento para servidores de juegos y contenedores con latencia ultra-baja.',
+            'extra_note' => 'Optimizada con soporte multi-arquitectura ARM64 y x86_64.',
+            'button_translate' => 'Comunidad',
+            'button_donate' => 'Documentación',
         ],
         'intro-help' => [
             'heading' => '¿Necesitas ayuda?',

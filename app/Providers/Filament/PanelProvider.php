@@ -35,10 +35,10 @@ abstract class PanelProvider extends BasePanelProvider
                 '*/oauth/redirect/*',
             ])
             ->databaseNotifications()
-            ->brandName(config('app.name', 'Pelican'))
-            ->brandLogo(config('app.logo'))
-            ->brandLogoHeight('2rem')
-            ->favicon(config('app.favicon', '/pelican.ico'))
+            ->brandName(config('app.name', 'Corex'))
+            ->brandLogo(config('app.logo', '/corex-logo-horizontal.svg'))
+            ->brandLogoHeight('2.4rem')
+            ->favicon(config('app.favicon', '/corex.svg'))
             ->topNavigation(function () {
                 $navigationType = user()?->getCustomization(CustomizationKey::TopNavigation);
 

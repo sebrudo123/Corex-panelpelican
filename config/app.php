@@ -2,9 +2,9 @@
 
 return [
 
-    'name' => env('APP_NAME', 'Pelican'),
-    'logo' => env('APP_LOGO'),
-    'favicon' => env('APP_FAVICON', '/pelican.ico'),
+    'name' => env('APP_NAME', 'Corex'),
+    'logo' => env('APP_LOGO', '/corex.svg'),
+    'favicon' => env('APP_FAVICON', '/corex.svg'),
 
     'version' => 'canary',
 

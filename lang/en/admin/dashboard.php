@@ -35,11 +35,11 @@ return [
             'button_label' => 'Create first Node',
         ],
         'intro-support' => [
-            'heading' => 'Support Pelican',
-            'content' => 'Thank you for using Pelican, this could only be achieved through the support of you, our contributors, and the rest of our supporters!',
-            'extra_note' => 'We appreciate any and all support from anybody.',
-            'button_translate' => 'Help Translate',
-            'button_donate' => 'Donate Directly',
+            'heading' => 'Corex Infrastructure',
+            'content' => 'High-performance game server and container orchestration platform with ultra-low latency.',
+            'extra_note' => 'Native multi-architecture ARM64 & x86_64 support.',
+            'button_translate' => 'Community',
+            'button_donate' => 'Documentation',
         ],
         'intro-help' => [
             'heading' => 'Need Help?',

@@ -1,14 +1,21 @@
 # syntax=docker.io/docker/dockerfile:1.13-labs
-# Pelican Production Dockerfile
+# Corex Panel Multi-Architecture Dockerfile (ARM64 & x86_64)
 
-##
-#  If you want to build this locally you want to run `docker build -f Dockerfile.dev .`
-##
+# ================================
+# Stage 0: Base PHP with extensions
+# ================================
+FROM --platform=$TARGETOS/$TARGETARCH php:8.4-fpm-alpine AS base
+
+ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+
+RUN install-php-extensions bcmath gd intl zip opcache pcntl pdo_mysql pdo_pgsql bz2 redis \
+    && rm /usr/local/bin/install-php-extensions \
+    && mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
 # ================================
 # Stage 1-1: Composer Install
 # ================================
-FROM --platform=$TARGETOS/$TARGETARCH localhost:5000/base-php:$TARGETARCH AS composer
+FROM --platform=$TARGETOS/$TARGETARCH base AS composer
 
 WORKDIR /build
 
@@ -56,41 +63,42 @@ COPY --from=composer /build .
 RUN yarn run build
 
 # ================================
-# Stage 5: Build Final Application Image
+# Stage 3: Build Final Corex Application Image
 # ================================
-FROM --platform=$TARGETOS/$TARGETARCH localhost:5000/base-php:$TARGETARCH AS final
+FROM --platform=$TARGETOS/$TARGETARCH base AS final
+
+LABEL maintainer="Corex Systems"
+LABEL description="Corex Panel - Game Server & Container Infrastructure Platform"
 
 WORKDIR /var/www/html
 
+# Install additional required libraries for Corex runtime
 RUN apk add --no-cache \
-    # packages for running the panel
-    caddy ca-certificates supervisor supercronic fcgi \
-    # required for installing plugins. Pulled from https://github.com/pelican/panel/pull/2034
-    zip unzip 7zip bzip2-dev yarn git
+    caddy ca-certificates supervisor supercronic fcgi coreutils \
+    zip unzip 7zip bzip2-dev yarn git bash
 
 # Copy composer binary for runtime plugin dependency management
 COPY --from=composer /usr/local/bin/composer /usr/local/bin/composer
 COPY --chown=root:www-data --chmod=770 --from=composerbuild /build .
 COPY --chown=root:www-data --chmod=770 --from=yarnbuild /build/public ./public
 
-# Create and remove directories
+# Create required directories and set symlinks
 RUN mkdir -p /pelican-data/storage /var/run/supervisord \
-# Symlinks for env, database, storage
-    && ln -s  /pelican-data/.env /var/www/html/.env \
-    && ln -s  /pelican-data/database/database.sqlite ./database/database.sqlite \
-    && ln -s  /pelican-data/storage /var/www/html/public/storage \
-    && ln -s  /pelican-data/storage /var/www/html/storage/app/public \
-# Allow www-data write permissions where necessary
-    && chown -R www-data: /pelican-data .env ./storage ./bootstrap/cache /var/run/supervisord /var/www/html/public/storage \
+    && ln -s /pelican-data/.env /var/www/html/.env \
+    && ln -s /pelican-data/database/database.sqlite ./database/database.sqlite \
+    && ln -s /pelican-data/storage /var/www/html/public/storage \
+    && ln -s /pelican-data/storage /var/www/html/storage/app/public \
+    && chown -R www-data:www-data /pelican-data .env ./storage ./bootstrap/cache /var/run/supervisord /var/www/html/public/storage \
     && chmod -R 770 /pelican-data ./storage ./bootstrap/cache /var/run/supervisord \
-    && chown -R www-data: /usr/local/etc/php/ /usr/local/etc/php-fpm.d/ /var/www/html/composer.json /var/www/html/composer.lock
+    && chown -R www-data:www-data /usr/local/etc/php/ /usr/local/etc/php-fpm.d/ /var/www/html/composer.json /var/www/html/composer.lock
+
 # Configure PHP and PHP-FPM
-COPY docker/php/pelican.ini /usr/local/etc/php/conf.d/zz-pelican.ini
-COPY docker/php/pelican-pool.conf /usr/local/etc/php-fpm.d/zz-pelican.conf
-# Configure Supervisor
+COPY docker/php/pelican.ini /usr/local/etc/php/conf.d/zz-corex.ini
+COPY docker/php/pelican-pool.conf /usr/local/etc/php-fpm.d/zz-corex.conf
+
+# Configure Supervisor and Caddy
 COPY docker/supervisord.conf /etc/supervisord.conf
 COPY docker/Caddyfile /etc/caddy/Caddyfile
-# Add Laravel scheduler to crontab
 COPY docker/crontab /etc/crontabs/crontab
 
 COPY docker/entrypoint.sh /entrypoint.sh
