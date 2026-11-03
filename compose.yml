@@ -1,13 +1,15 @@
 x-common:
   panel:
     &panel-environment
-    APP_URL: "http://localhost"
+    APP_URL: "http://localhost:8080"
+    DB_CONNECTION: "sqlite"
+    DB_DATABASE: "/pelican-data/database/database.sqlite"
     LE_EMAIL: "USEYOUROWNEMAILHERE@example.com" # email to be used for let's encrypt certificates
     APP_DEBUG: "false"
     APP_ENV: "production"
 
-    # BEHIND_PROXY: true # uncomment to run behind a proxy
-    # TRUSTED_PROXIES: 127.0.0.1,172.17.0.1,172.20.0.1 # defaults are for local proxies
+    BEHIND_PROXY: true # uncomment to run behind a proxy
+    TRUSTED_PROXIES: 127.0.0.1,172.17.0.1,172.20.0.1 # defaults are for local proxies
 
   mail:
     &mail-environment
@@ -34,9 +36,8 @@ services:
     networks:
       - default
     ports:
-      - "80:80"
       - "8080:80"
-      - "443:443"
+      - "8000:80"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
