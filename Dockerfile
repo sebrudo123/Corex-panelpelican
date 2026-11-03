@@ -6,6 +6,8 @@
 # ================================
 FROM --platform=$TARGETOS/$TARGETARCH php:8.4-fpm-alpine AS base
 
+RUN sed -i 's/dl-cdn.alpinelinux.org/uk.alpinelinux.org/g' /etc/apk/repositories
+
 ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 
 RUN install-php-extensions bcmath gd intl zip opcache pcntl pdo_mysql pdo_pgsql bz2 redis \
