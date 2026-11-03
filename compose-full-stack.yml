@@ -52,20 +52,17 @@ services:
 
   panel:
     image: corex-panel:latest
-    build: .
     restart: unless-stopped
     networks:
       - default
     ports:
       - "80:80"
       - "443:443"
-      # - "81:80" # if you are behind a proxy uncomment this line and comment out 80 and 443
-      # - "9000:9000" # enable when not using caddy to be able to reach php-fpm
     links:
       - database
       - cache
     extra_hosts:
-      - "host.docker.internal:host-gateway" # shows the panel on the internal docker network as well. usually '172.17.0.1'
+      - "host.docker.internal:host-gateway"
     volumes:
       - pelican-data:/pelican-data
       - pelican-logs:/var/www/html/storage/logs
@@ -74,6 +71,16 @@ services:
         target: /var/www/html/plugins
         volume:
           subpath: plugins
+      - ./public/corex.svg:/var/www/html/public/corex.svg:ro
+      - ./public/corex-logo-horizontal.svg:/var/www/html/public/corex-logo-horizontal.svg:ro
+      - ./public/pelican.svg:/var/www/html/public/pelican.svg:ro
+      - ./app/Filament/Server/Pages/PluginMarketplace.php:/var/www/html/app/Filament/Server/Pages/PluginMarketplace.php:ro
+      - ./resources/views/filament/server/pages/plugin-marketplace.blade.php:/var/www/html/resources/views/filament/server/pages/plugin-marketplace.blade.php:ro
+      - ./app/Console/Commands/Corex:/var/www/html/app/Console/Commands/Corex:ro
+      - ./database/eggs/corex:/var/www/html/database/eggs/corex:ro
+      - ./app/Providers/Filament/PanelProvider.php:/var/www/html/app/Providers/Filament/PanelProvider.php:ro
+      - ./app/Providers/Filament/FilamentServiceProvider.php:/var/www/html/app/Providers/Filament/FilamentServiceProvider.php:ro
+      - ./config/app.php:/var/www/html/config/app.php:ro
     environment:
       <<: [*panel-environment, *mail-environment]
       XDG_DATA_HOME: /pelican-data
